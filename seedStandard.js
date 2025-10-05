@@ -7,6 +7,9 @@ mongoose.connect("mongodb+srv://adinakhalid99_db_user:4xm8yYPZeIDk5W9T@cluster0.
 });
 
 const standards = [
+  // =============================
+  // 📘 PMBOK 7th Edition
+  // =============================
   {
     slug: "pmbok7",
     title: "PMBOK Guide 7th Edition",
@@ -26,117 +29,93 @@ const standards = [
     sections: [
       {
         id: "1",
-        title: "Introduction to PMBOK Guide",
-        text: "The PMBOK Guide provides a principles-based approach focusing on value delivery and tailoring to specific project contexts.",
+        title: "Introduction",
+        text: "Defines the standard for project management and introduces the PMBOK Guide structure.",
         page: 1,
         subsections: [
-          {
-            id: "1.1",
-            title: "Purpose of the Guide",
-            text: "Defines the standard for project management and its relationship to value delivery in organizations.",
-            page: 2
-          },
-          {
-            id: "1.2",
-            title: "What is Project Management",
-            text: "The application of knowledge, skills, tools, and techniques to project activities to meet project requirements.",
-            page: 3
-          }
+          { id: "1.1", title: "Purpose of the Standard", text: "Outlines the intent and purpose of the PMBOK Standard.", page: 2 },
+          { id: "1.2", title: "Key Terms and Concepts", text: "Defines essential terminology for project management.", page: 3 },
+          { id: "1.3", title: "Audience for the Standard", text: "Describes who should use this standard.", page: 4 },
         ],
       },
       {
         id: "2",
-        title: "Project Management Principles",
-        text: "Twelve principles that guide the behavior of project management practitioners.",
-        page: 15,
+        title: "A System for Value Delivery",
+        text: "Explains the value delivery framework and organizational environment.",
+        page: 10,
         subsections: [
-          {
-            id: "2.1",
-            title: "Stewardship",
-            text: "Be a diligent, respectful, and caring steward of resources and the environment.",
-            page: 16
-          },
-          {
-            id: "2.2",
-            title: "Team",
-            text: "Build a culture of accountability and respect among team members.",
-            page: 18
-          },
-          {
-            id: "2.3",
-            title: "Stakeholders",
-            text: "Engage stakeholders proactively and continuously throughout the project.",
-            page: 20
-          },
-          {
-            id: "2.4",
-            title: "Value",
-            text: "Focus on delivering value and benefits to organizations and stakeholders.",
-            page: 22
-          }
+          { id: "2.1", title: "Creating Value", text: "How projects create value through outcomes and benefits.", page: 11 },
+          { id: "2.2", title: "Organizational Governance Systems", text: "Explains governance, information flow, and oversight.", page: 15 },
+          { id: "2.3", title: "Functions Associated with Projects", text: "Outlines various organizational functions supporting projects.", page: 18 },
+          { id: "2.4", title: "The Project Environment", text: "Explains internal and external project environments.", page: 25 },
+          { id: "2.5", title: "Product Management Considerations", text: "Describes how products relate to project management.", page: 30 },
         ],
       },
       {
         id: "3",
-        title: "Performance Domains",
-        text: "Eight interconnected performance domains that are critical for delivering project outcomes.",
+        title: "Project Management Principles",
+        text: "The 12 fundamental principles that guide effective project management.",
         page: 35,
         subsections: [
-          { 
-            id: "3.1", 
-            title: "Stakeholder Performance Domain", 
-            text: "Effective engagement and communication with stakeholders throughout project lifecycle.",
-            page: 36
-          },
-          { 
-            id: "3.2", 
-            title: "Team Performance Domain", 
-            text: "Focus on developing and sustaining high-performing teams and collaboration.",
-            page: 40
-          },
-          { 
-            id: "3.3", 
-            title: "Development Approach and Life Cycle Performance Domain", 
-            text: "Selecting and adapting development approaches and life cycles.",
-            page: 45
-          },
-          { 
-            id: "3.4", 
-            title: "Planning Performance Domain", 
-            text: "Iterative planning processes that enable adaptability and responsiveness.",
-            page: 50
-          },
-          { 
-            id: "3.5", 
-            title: "Project Work Performance Domain", 
-            text: "Coordinating and performing project work to deliver expected outcomes.",
-            page: 55
-          }
+          { id: "3.1", title: "Be a Diligent, Respectful, and Caring Steward", text: "", page: 36 },
+          { id: "3.2", title: "Create a Collaborative Project Team Environment", text: "", page: 37 },
+          { id: "3.3", title: "Effectively Engage with Stakeholders", text: "", page: 38 },
+          { id: "3.4", title: "Focus on Value", text: "", page: 39 },
+          { id: "3.5", title: "Recognize, Evaluate, and Respond to System Interactions", text: "", page: 40 },
+          { id: "3.6", title: "Demonstrate Leadership Behaviors", text: "", page: 41 },
+          { id: "3.7", title: "Tailor Based on Context", text: "", page: 42 },
+          { id: "3.8", title: "Build Quality into Processes and Deliverables", text: "", page: 43 },
+          { id: "3.9", title: "Navigate Complexity", text: "", page: 44 },
+          { id: "3.10", title: "Optimize Risk Responses", text: "", page: 45 },
+          { id: "3.11", title: "Embrace Adaptability and Resiliency", text: "", page: 46 },
+          { id: "3.12", title: "Enable Change to Achieve the Envisioned Future State", text: "", page: 47 },
         ],
       },
       {
         id: "4",
-        title: "Tailoring",
-        text: "Adapting project management approaches to suit the specific context and needs of the project.",
-        page: 65,
+        title: "Project Performance Domains",
+        text: "Eight performance domains essential for project success.",
+        page: 50,
         subsections: [
-          {
-            id: "4.1",
-            title: "What is Tailoring",
-            text: "The deliberate adaptation of project management approach, governance, and processes.",
-            page: 66
-          },
-          {
-            id: "4.2",
-            title: "Tailoring Considerations",
-            text: "Factors to consider when tailoring including project size, complexity, and organizational culture.",
-            page: 68
-          }
+          { id: "4.1", title: "Stakeholder Performance Domain", text: "Stakeholder engagement and analysis.", page: 51 },
+          { id: "4.2", title: "Team Performance Domain", text: "Leadership, culture, and collaboration.", page: 52 },
+          { id: "4.3", title: "Development Approach and Life Cycle Performance Domain", text: "Development approaches and life cycle selection.", page: 53 },
+          { id: "4.4", title: "Planning Performance Domain", text: "Project planning and communication processes.", page: 54 },
+          { id: "4.5", title: "Project Work Performance Domain", text: "Coordinating and performing project work.", page: 55 },
+          { id: "4.6", title: "Delivery Performance Domain", text: "Deliverables and value realization.", page: 56 },
+          { id: "4.7", title: "Measurement Performance Domain", text: "Establishing effective measures and monitoring.", page: 57 },
+          { id: "4.8", title: "Uncertainty Performance Domain", text: "Risk, ambiguity, and complexity management.", page: 58 },
         ],
-      }
+      },
+      {
+        id: "5",
+        title: "Tailoring",
+        text: "Adapting methods to fit project context.",
+        page: 60,
+        subsections: [
+          { id: "5.1", title: "Why Tailor?", text: "", page: 61 },
+          { id: "5.2", title: "What to Tailor", text: "Life cycle, processes, and engagement methods.", page: 62 },
+          { id: "5.3", title: "The Tailoring Process", text: "Steps to adapt methodology.", page: 63 },
+        ],
+      },
+      {
+        id: "6",
+        title: "Models, Methods, and Artifacts",
+        text: "Common tools and artifacts used across performance domains.",
+        page: 65,
+      },
+      {
+        id: "7",
+        title: "Appendices",
+        text: "Supporting materials, glossaries, and references.",
+        page: 90,
+      },
     ],
   },
 
+  // =============================
+  // 👑 PRINCE2 7th Edition
+  // =============================
   {
     slug: "prince2",
     title: "PRINCE2 7th Edition",
@@ -153,146 +132,35 @@ const standards = [
       ],
     },
     sections: [
-      {
-        id: "1",
-        title: "PRINCE2 Principles",
-        text: "The seven guiding principles that form the foundation of PRINCE2 methodology.",
-        page: 1,
-        subsections: [
-          { 
-            id: "1.1", 
-            title: "Continued Business Justification", 
-            text: "A PRINCE2 project must have continued business justification that is documented and approved.",
-            page: 2
-          },
-          { 
-            id: "1.2", 
-            title: "Learn from Experience", 
-            text: "PRINCE2 project teams should learn from previous projects and apply those lessons throughout.",
-            page: 4
-          },
-          { 
-            id: "1.3", 
-            title: "Defined Roles and Responsibilities", 
-            text: "Clear accountability and governance structure with defined roles and responsibilities.",
-            page: 6
-          },
-          { 
-            id: "1.4", 
-            title: "Manage by Stages", 
-            text: "PRINCE2 projects are planned, monitored, and controlled on a stage-by-stage basis.",
-            page: 8
-          },
-          { 
-            id: "1.5", 
-            title: "Manage by Exception", 
-            text: "Establishing tolerances for delegation and escalation when tolerances are exceeded.",
-            page: 10
-          }
-        ],
-      },
-      {
-        id: "2",
-        title: "PRINCE2 Themes",
-        text: "The seven aspects of project management that must be addressed throughout the project.",
-        page: 15,
-        subsections: [
-          { 
-            id: "2.1", 
-            title: "Business Case Theme", 
-            text: "Justifies the project's existence, investment, and ensures it remains desirable, viable, and achievable.",
-            page: 16
-          },
-          { 
-            id: "2.2", 
-            title: "Organization Theme", 
-            text: "Defines project structure, roles, responsibilities, and governance arrangements.",
-            page: 20
-          },
-          { 
-            id: "2.3", 
-            title: "Quality Theme", 
-            text: "Ensures project outputs meet agreed acceptance criteria and are fit for purpose.",
-            page: 25
-          },
-          { 
-            id: "2.4", 
-            title: "Plans Theme", 
-            text: "Provides the framework for designing, developing, and maintaining project plans.",
-            page: 30
-          },
-          { 
-            id: "2.5", 
-            title: "Risk Theme", 
-            text: "Identifies, assesses, and controls uncertainty to improve the likelihood of success.",
-            page: 35
-          }
-        ],
-      },
-      {
-        id: "3",
-        title: "PRINCE2 Processes",
-        text: "The seven processes that guide the project from start to finish.",
-        page: 40,
-        subsections: [
-          { 
-            id: "3.1", 
-            title: "Starting Up a Project", 
-            text: "Appoint project board and prepare project brief to determine project viability.",
-            page: 41
-          },
-          { 
-            id: "3.2", 
-            title: "Initiating a Project", 
-            text: "Develop Project Initiation Documentation (PID) and establish project control framework.",
-            page: 45
-          },
-          { 
-            id: "3.3", 
-            title: "Directing a Project", 
-            text: "Project board provides direction and decision-making throughout the project.",
-            page: 50
-          },
-          { 
-            id: "3.4", 
-            title: "Controlling a Stage", 
-            text: "Monitor progress, manage issues, and report status to the project board.",
-            page: 55
-          },
-          { 
-            id: "3.5", 
-            title: "Managing Product Delivery", 
-            text: "Team manager coordinates work package delivery and ensures quality standards.",
-            page: 60
-          }
-        ],
-      },
-      {
-        id: "4",
-        title: "PRINCE2 in Practice",
-        text: "Practical application and tailoring of PRINCE2 methodology.",
-        page: 65,
-        subsections: [
-          {
-            id: "4.1",
-            title: "Tailoring PRINCE2",
-            text: "Adapting PRINCE2 to suit different project environments, sizes, and complexities.",
-            page: 66
-          },
-          {
-            id: "4.2",
-            title: "PRINCE2 in Agile Environments",
-            text: "Integrating PRINCE2 with agile delivery methods for hybrid project management.",
-            page: 70
-          }
-        ],
-      }
+      { id: "1", title: "Introduction", text: "Overview of PRINCE2 structure and purpose.", page: 1 },
+      { id: "2", title: "Principles", text: "Seven guiding principles.", page: 19 },
+      { id: "3", title: "People", text: "Leading teams, communication, and people focus.", page: 31 },
+      { id: "4", title: "Introduction to PRINCE2 Practices", text: "Structure and purpose of PRINCE2 practices.", page: 49 },
+      { id: "5", title: "Business Case", text: "Defines justification and continued viability.", page: 55 },
+      { id: "6", title: "Organizing", text: "Roles, responsibilities, and governance.", page: 73 },
+      { id: "7", title: "Plans", text: "Creating and maintaining effective plans.", page: 97 },
+      { id: "8", title: "Quality", text: "Quality management processes.", page: 127 },
+      { id: "9", title: "Risk", text: "Risk identification and mitigation.", page: 147 },
+      { id: "10", title: "Issues", text: "Managing project issues and changes.", page: 167 },
+      { id: "11", title: "Progress", text: "Monitoring progress and control.", page: 185 },
+      { id: "12", title: "Introduction to PRINCE2 Processes", text: "PRINCE2 process overview.", page: 213 },
+      { id: "13", title: "Starting Up a Project", text: "Project initiation and setup.", page: 219 },
+      { id: "14", title: "Directing a Project", text: "Project board responsibilities.", page: 229 },
+      { id: "15", title: "Initiating a Project", text: "Planning and preparing project framework.", page: 239 },
+      { id: "16", title: "Controlling a Stage", text: "Monitoring and controlling each stage.", page: 251 },
+      { id: "17", title: "Managing Product Delivery", text: "Coordinating deliverable production.", page: 261 },
+      { id: "18", title: "Managing a Stage Boundary", text: "Managing transitions between stages.", page: 269 },
+      { id: "19", title: "Closing a Project", text: "Formal closure and evaluation.", page: 277 },
+      { id: "20", title: "Appendices", text: "Management products, roles, glossary, and index.", page: 285 },
     ],
   },
 
+  // =============================
+  // 🌍 ISO 21500:2021
+  // =============================
   {
     slug: "iso21500",
-    title: "ISO 21500:2021 - Guidance on Project Management",
+    title: "ISO 21500:2021 - Guidance on Project, Programme and Portfolio Management",
     version: "2021",
     meta: {
       publisher: "International Organization for Standardization",
@@ -302,140 +170,42 @@ const standards = [
       keyConcepts: [
         "Governance Framework",
         "Alignment with Organizational Strategy",
-        "Project, Program, and Portfolio Integration",
+        "Integrated Management Approaches",
       ],
     },
     sections: [
-      {
-        id: "1",
-        title: "Introduction to ISO 21500",
-        text: "Provides high-level guidance on managing projects effectively across industries and organizational contexts.",
-        page: 1,
-        subsections: [
-          {
-            id: "1.1",
-            title: "Scope and Purpose",
-            text: "International standard providing guidance on concepts and processes for project management.",
-            page: 2
-          },
-          {
-            id: "1.2",
-            title: "Target Audience",
-            text: "Intended for senior managers, project sponsors, project managers, and project team members.",
-            page: 3
-          }
-        ],
-      },
-      {
-        id: "2",
-        title: "Fundamental Concepts",
-        text: "Core concepts and principles that underpin effective project management.",
-        page: 10,
-        subsections: [
-          { 
-            id: "2.1", 
-            title: "Project Governance", 
-            text: "Projects operate within a governance framework that aligns with organizational objectives.",
-            page: 11
-          },
-          { 
-            id: "2.2", 
-            title: "Strategy Alignment", 
-            text: "Ensure project objectives support and align with organizational strategy and goals.",
-            page: 13
-          },
-          { 
-            id: "2.3", 
-            title: "Stakeholder Management", 
-            text: "Systematic identification, analysis, and engagement of project stakeholders.",
-            page: 15
-          },
-          { 
-            id: "2.4", 
-            title: "Project Constraints", 
-            text: "Managing competing constraints including scope, time, cost, quality, and risk.",
-            page: 17
-          }
-        ],
-      },
-      {
-        id: "3",
-        title: "Project Management Processes",
-        text: "Grouping of project management processes into logical categories.",
-        page: 25,
-        subsections: [
-          { 
-            id: "3.1", 
-            title: "Initiating Process Group", 
-            text: "Define project scope, objectives, and obtain authorization to start the project.",
-            page: 26
-          },
-          { 
-            id: "3.2", 
-            title: "Planning Process Group", 
-            text: "Develop project management plans, establish baselines, and define project approach.",
-            page: 30
-          },
-          { 
-            id: "3.3", 
-            title: "Implementing Process Group", 
-            text: "Direct and manage project work, acquire resources, and develop project team.",
-            page: 35
-          },
-          { 
-            id: "3.4", 
-            title: "Controlling Process Group", 
-            text: "Monitor, measure, analyze, and adjust project performance and progress.",
-            page: 40
-          },
-          { 
-            id: "3.5", 
-            title: "Closing Process Group", 
-            text: "Formalize project acceptance, handover deliverables, and close project activities.",
-            page: 45
-          }
-        ],
-      },
+      { id: "1", title: "Scope", text: "", page: 1 },
+      { id: "2", title: "Normative References", text: "", page: 1 },
+      { id: "3", title: "Terms and Definitions", text: "", page: 1 },
       {
         id: "4",
-        title: "Subject Groups",
-        text: "Grouping of related project management subjects and knowledge areas.",
-        page: 50,
+        title: "Project, Programme and Portfolio Management Concepts",
+        text: "Defines the principles, organizational, and external environments.",
+        page: 3,
         subsections: [
-          {
-            id: "4.1",
-            title: "Integration Management",
-            text: "Coordinates all project elements and ensures proper coordination.",
-            page: 51
-          },
-          {
-            id: "4.2",
-            title: "Stakeholder Management",
-            text: "Identifies and engages stakeholders to meet their needs and expectations.",
-            page: 55
-          },
-          {
-            id: "4.3",
-            title: "Scope Management",
-            text: "Defines and controls what is included and excluded from the project.",
-            page: 60
-          },
-          {
-            id: "4.4",
-            title: "Resource Management",
-            text: "Identifies, acquires, and manages resources needed for project success.",
-            page: 65
-          },
-          {
-            id: "4.5",
-            title: "Time Management",
-            text: "Plans and controls project schedule to ensure timely completion.",
-            page: 70
-          }
+          { id: "4.1", title: "General", page: 3 },
+          { id: "4.2", title: "Projects, Programmes and Portfolios", page: 4 },
+          { id: "4.3", title: "Organizational Environment", page: 5 },
+          { id: "4.4", title: "External Environment", page: 5 },
+          { id: "4.5", title: "Strategy Implementation", page: 6 },
+          { id: "4.6", title: "Integrated Governance and Management Approaches", page: 7 },
         ],
-      }
+      },
+      {
+        id: "5",
+        title: "Standards on Project, Programme and Portfolio Management",
+        text: "Overview of standards and selection considerations.",
+        page: 8,
+        subsections: [
+          { id: "5.1", title: "General", page: 8 },
+          { id: "5.2", title: "Overview", page: 9 },
+          { id: "5.3", title: "Benefits of Using Standards", page: 10 },
+          { id: "5.4", title: "Organizational Considerations for Selection", page: 11 },
+        ],
+      },
+      { id: "6", title: "Bibliography", text: "", page: 12 },
     ],
-  }
+  },
 ];
 
 async function seed() {
