@@ -9,9 +9,6 @@ const Comparisons = () => {
   const navigate = useNavigate();
   
   const [selectedComparison, setSelectedComparison] = useState(null);
-  const [viewMode, setViewMode] = useState("grid");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterTopic, setFilterTopic] = useState("all");
   const [selectedTopic, setSelectedTopic] = useState("");
   const [comparisonMode, setComparisonMode] = useState("browse");
   const [topicSearchTerm, setTopicSearchTerm] = useState("");
@@ -38,23 +35,10 @@ const Comparisons = () => {
     topic.toLowerCase().includes(topicSearchTerm.toLowerCase())
   );
 
-  // Handle different data structures
-  let comparisons = [];
+  // Handle standards data
   let standards = [];
   
-  // Handle comparisons data
-  if (comparisonsData) {
-    console.log("Comparisons Data:", comparisonsData);
-    if (Array.isArray(comparisonsData.data)) {
-      comparisons = comparisonsData.data;
-    } else if (Array.isArray(comparisonsData)) {
-      comparisons = comparisonsData;
-    }
-  }
-
-  // Handle standards data
   if (standardsData) {
-    console.log("Standards Data:", standardsData);
     if (Array.isArray(standardsData.data)) {
       standards = standardsData.data;
     } else if (Array.isArray(standardsData)) {
@@ -62,114 +46,96 @@ const Comparisons = () => {
     }
   }
 
-  console.log("Processed Standards:", standards);
-  console.log("Processed Comparisons:", comparisons);
+  console.log("Available Standards:", standards.map(s => ({ slug: s.slug, title: s.title })));
 
-  // Extract unique topics for filter
-  const topics = ["all", ...new Set(comparisons.map(comp => comp.topic).filter(Boolean))];
-
-  const filteredComparisons = comparisons.filter(comparison => {
-    const matchesSearch = 
-      comparison.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      comparison.topic?.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesTopic = filterTopic === "all" || comparison.topic === filterTopic;
-
-    return matchesSearch && matchesTopic;
-  });
-
-  const getStandardColor = (slug) => {
-    const colors = {
-      pmbok: "#667eea",
-      pmbok7: "#667eea",
-      prince2: "#ed64a6",
-      iso21500: "#48bb78",
-      agile: "#f56565"
-    };
-    return colors[slug] || "#a0aec0";
-  };
-
-  const getStandardIcon = (slug) => {
-    const icons = {
-      pmbok: "📚",
-      pmbok7: "📚",
-      prince2: "👑",
-      iso21500: "🌍",
-      agile: "🔄"
-    };
-    return icons[slug] || "📋";
-  };
-
-  // Find section in standards data
-  const findSection = (standardSlug, sectionId) => {
+  // Enhanced section matching with predefined relevant sections
+  const getRelevantSections = (standardSlug, topic) => {
     const standard = standards.find(s => s.slug === standardSlug);
-    if (!standard || !standard.sections) return null;
+    if (!standard || !standard.sections) return [];
 
-    const findInSections = (sections, targetId) => {
+    // Predefined section mappings for each standard and topic
+    const sectionMappings = {
+      pmbok7: {
+        "Risk Management": ["4.8", "3.10"], // Uncertainty Performance Domain, Optimize Risk Responses
+        "Stakeholder Engagement": ["4.1", "3.3"], // Stakeholder Performance Domain, Engage with Stakeholders
+        "Quality Management": ["3.8", "4.4"], // Build Quality, Planning Performance Domain
+        "Project Planning": ["4.4", "3.7"], // Planning Performance Domain, Tailoring
+        "Change Management": ["3.12", "4.5"], // Enable Change, Project Work Performance Domain
+        "Resource Management": ["4.2", "3.2"], // Team Performance Domain, Collaborative Environment
+        "Communication Management": ["4.1", "3.3"], // Stakeholder Performance Domain, Engage with Stakeholders
+        "Procurement Management": ["4.5"], // Project Work Performance Domain
+        "Integration Management": ["4.5", "2.3"], // Project Work Performance Domain, Functions
+        "Scope Management": ["4.4", "4.5"], // Planning Performance Domain, Project Work
+        "Time Management": ["4.4", "4.5"], // Planning Performance Domain, Project Work
+        "Cost Management": ["4.4", "4.5"]  // Planning Performance Domain, Project Work
+      },
+      prince2: {
+        "Risk Management": ["9"],
+        "Stakeholder Engagement": ["6", "11"],
+        "Quality Management": ["8"],
+        "Project Planning": ["7"],
+        "Change Management": ["10"],
+        "Resource Management": ["6"],
+        "Communication Management": ["6", "11"],
+        "Procurement Management": ["6"],
+        "Integration Management": ["12", "13"],
+        "Scope Management": ["7", "10"],
+        "Time Management": ["7", "11"],
+        "Cost Management": ["7", "11"]
+      },
+      iso21500: {
+        "Risk Management": ["4"],
+        "Stakeholder Engagement": ["4"],
+        "Quality Management": ["4"],
+        "Project Planning": ["4"],
+        "Change Management": ["4"],
+        "Resource Management": ["4"],
+        "Communication Management": ["4"],
+        "Procurement Management": ["4"],
+        "Integration Management": ["4.6"],
+        "Scope Management": ["4"],
+        "Time Management": ["4"],
+        "Cost Management": ["4"]
+      }
+    };
+
+    const relevantSectionIds = sectionMappings[standardSlug]?.[topic] || [];
+    const relevantSections = [];
+
+    const findSectionById = (sections, targetId) => {
       for (const section of sections) {
-        if (section.id === targetId) return section;
+        if (section.id === targetId) {
+          return section;
+        }
         if (section.subsections) {
-          const found = findInSections(section.subsections, targetId);
+          const found = findSectionById(section.subsections, targetId);
           if (found) return found;
         }
       }
       return null;
     };
 
-    return findInSections(standard.sections, sectionId);
-  };
-
-  // Navigate to standard section with highlighting
-  const navigateToSection = (standardSlug, sectionId) => {
-    navigate(`/standards?standard=${standardSlug}&section=${sectionId}&highlight=true`);
-  };
-
-  // Generate comprehensive comparison for a topic
-  const generateComparison = (topic) => {
-    console.log("Generating comparison for topic:", topic);
-    console.log("Available standards:", standards.map(s => s.slug));
-
-    const comparison = {
-      title: `${topic} Comparison`,
-      topic: topic,
-      standards: {
-        pmbok: { sections: [], approach: "", focus: "" },
-        prince2: { sections: [], approach: "", focus: "" },
-        iso21500: { sections: [], approach: "", focus: "" }
-      },
-      insights: {
-        similarities: [],
-        differences: [],
-        uniquePoints: []
-      },
-      recommendations: []
-    };
-
-    // Generate data for each standard
-    standards.forEach(standard => {
-      console.log(`Processing standard: ${standard.slug}`);
-      const relevantSections = findRelevantSections(standard, topic);
-      comparison.standards[standard.slug] = {
-        sections: relevantSections,
-        approach: getStandardApproach(standard.slug),
-        focus: getStandardFocus(standard.slug)
-      };
-      console.log(`Sections found for ${standard.slug}:`, relevantSections.length);
+    relevantSectionIds.forEach(sectionId => {
+      const section = findSectionById(standard.sections, sectionId);
+      if (section) {
+        relevantSections.push({
+          ...section,
+          relevanceScore: 90 // High relevance for predefined mappings
+        });
+      }
     });
 
-    // Generate comprehensive insights
-    comparison.insights = generateComprehensiveInsights(topic);
-    comparison.recommendations = generateRecommendations(topic);
-    
-    console.log("Generated comparison:", comparison);
-    return comparison;
+    // Fallback: Search for relevant sections if no predefined mappings found
+    if (relevantSections.length === 0) {
+      const fallbackSections = findRelevantSectionsByContent(standard, topic);
+      relevantSections.push(...fallbackSections);
+    }
+
+    return relevantSections.slice(0, 5); // Limit to top 5 sections
   };
 
-  const findRelevantSections = (standard, topic) => {
-    if (!standard.sections || !Array.isArray(standard.sections)) {
-      console.log(`No sections found for ${standard.slug}`);
-      return [];
-    }
+  const findRelevantSectionsByContent = (standard, topic) => {
+    if (!standard.sections || !Array.isArray(standard.sections)) return [];
     
     const relevant = [];
     const searchSections = (sections, depth = 0) => {
@@ -189,10 +155,7 @@ const Comparisons = () => {
     };
     
     searchSections(standard.sections);
-    // Sort by relevance and limit to top 5 sections
-    const sortedRelevant = relevant.sort((a, b) => b.relevanceScore - a.relevanceScore).slice(0, 5);
-    console.log(`Relevant sections for ${standard.slug}:`, sortedRelevant);
-    return sortedRelevant;
+    return relevant.sort((a, b) => b.relevanceScore - a.relevanceScore).slice(0, 3);
   };
 
   const calculateRelevance = (section, topic) => {
@@ -202,9 +165,9 @@ const Comparisons = () => {
     const topicWords = topic.toLowerCase().split(' ');
     
     topicWords.forEach(word => {
-      if (section.title?.toLowerCase().includes(word)) score += 3;
-      if (section.text?.toLowerCase().includes(word)) score += 2;
-      if (section.subsections?.some(sub => sub.title?.toLowerCase().includes(word))) score += 1;
+      if (section.title?.toLowerCase().includes(word)) score += 10;
+      if (section.text?.toLowerCase().includes(word)) score += 5;
+      if (section.subsections?.some(sub => sub.title?.toLowerCase().includes(word))) score += 3;
     });
     
     return score;
@@ -212,119 +175,179 @@ const Comparisons = () => {
 
   const getStandardApproach = (slug) => {
     const approaches = {
-      pmbok: "Process-based framework with principles and performance domains",
-      pmbok7: "Process-based framework with 12 principles and 8 performance domains",
-      prince2: "Principle-theme-process methodology with product-based planning",
-      iso21500: "Guidance standard focusing on project management concepts and processes"
+      pmbok7: "Process-based framework with 12 principles and 8 performance domains focusing on value delivery through tailored approaches",
+      prince2: "Structured methodology with 7 principles, 7 themes, and 7 processes emphasizing business justification and controlled stage management",
+      iso21500: "International guidance standard providing high-level framework for project management concepts applicable across all organization types"
     };
     return approaches[slug] || "Standard project management approach";
   };
 
   const getStandardFocus = (slug) => {
     const focuses = {
-      pmbok: "Delivering value through tailored processes and principles",
-      pmbok7: "Delivering value through tailored processes and principles",
-      prince2: "Business justification and controlled stage management",
-      iso21500: "Universal guidance applicable to all organization types"
+      pmbok7: "Value delivery through principles-based framework and performance domains with emphasis on tailoring and adaptability",
+      prince2: "Business case-driven approach with strong governance, stage controls, and product-based planning",
+      iso21500: "Universal guidance and best practices that can be adapted to any organizational context or project type"
     };
-    return focuses[slug] || "Project management best practices";
+    return focuses[slug] || "Project management best practices and guidance";
+  };
+
+  // Generate comprehensive comparison for a topic
+  const generateComparison = (topic) => {
+    console.log("Generating comparison for topic:", topic);
+
+    const comparison = {
+      title: `${topic} Comparison`,
+      topic: topic,
+      standards: {
+        pmbok7: { sections: [], approach: "", focus: "" },
+        prince2: { sections: [], approach: "", focus: "" },
+        iso21500: { sections: [], approach: "", focus: "" }
+      },
+      insights: {
+        similarities: [],
+        differences: [],
+        uniquePoints: []
+      },
+      recommendations: []
+    };
+
+    // Generate data for each standard
+    standards.forEach(standard => {
+      console.log(`Processing standard: ${standard.slug}`);
+      const relevantSections = getRelevantSections(standard.slug, topic);
+      comparison.standards[standard.slug] = {
+        sections: relevantSections,
+        approach: getStandardApproach(standard.slug),
+        focus: getStandardFocus(standard.slug)
+      };
+      console.log(`Sections found for ${standard.slug}:`, relevantSections.length);
+    });
+
+    // Generate comprehensive insights
+    comparison.insights = generateComprehensiveInsights(topic);
+    comparison.recommendations = generateRecommendations(topic);
+    
+    return comparison;
   };
 
   const generateComprehensiveInsights = (topic) => {
-    const insights = {
-      similarities: [],
-      differences: [],
-      uniquePoints: []
-    };
-
     // Comprehensive insights for each topic
     const topicInsights = {
       "Risk Management": {
         similarities: [
-          "All methodologies require formal risk identification processes",
-          "Risk assessment (probability and impact) is universally applied",
-          "Risk response planning is mandatory across all frameworks",
-          "Continuous risk monitoring throughout project lifecycle",
-          "Documentation of risk register or equivalent"
+          "All methodologies require formal risk identification and assessment processes",
+          "Risk monitoring and control throughout project lifecycle is mandatory",
+          "Documentation of risk responses and mitigation strategies required",
+          "Stakeholder involvement in risk management emphasized",
+          "Proactive risk management approach recommended"
         ],
         differences: [
-          "PMBOK: Detailed quantitative analysis techniques (EMV, decision trees)",
-          "PRINCE2: Risk management integrated as a continuous theme with specific risk budget",
-          "ISO 21500: High-level guidance without prescribed techniques",
-          "PMBOK separates risk into planning, identification, analysis, response planning",
-          "PRINCE2 uses risk appetite and tolerance levels explicitly"
+          "PMBOK: Detailed quantitative and qualitative analysis techniques with specific risk categories",
+          "PRINCE2: Integrated risk management theme with explicit risk budget and tolerance levels",
+          "ISO 21500: High-level guidance without prescribed techniques, focused on principles",
+          "PMBOK separates risk management into dedicated processes and performance domains",
+          "PRINCE2 embeds risk management throughout all processes with specific risk checkpoints"
         ],
         uniquePoints: [
-          "PMBOK ONLY: Monte Carlo simulation and tornado diagrams for quantitative analysis",
-          "PRINCE2 ONLY: Risk budget concept for financial risk allocation",
-          "ISO 21500 ONLY: Alignment with ISO 31000 risk management standard",
-          "PMBOK ONLY: Specific risk categorization (technical, external, organizational)",
-          "PRINCE2 ONLY: Early warning indicators and risk checkpoint reviews"
+          "PMBOK ONLY: Monte Carlo simulation, decision tree analysis, and detailed quantitative methods",
+          "PRINCE2 ONLY: Risk budget concept for financial risk allocation and early warning indicators",
+          "ISO 21500 ONLY: Direct alignment with ISO 31000 risk management standard framework",
+          "PMBOK ONLY: Specific risk breakdown structure and detailed categorization system",
+          "PRINCE2 ONLY: Risk management strategy document and formal risk review meetings"
         ]
       },
       "Stakeholder Engagement": {
         similarities: [
-          "Stakeholder identification is fundamental initial step",
-          "Communication planning required for all key stakeholders",
-          "Expectation management emphasized across methodologies",
-          "Regular stakeholder engagement throughout project lifecycle",
-          "Documentation of stakeholder analysis and engagement strategies"
+          "Stakeholder identification and analysis is fundamental initial activity",
+          "Communication planning required for effective stakeholder management",
+          "Regular engagement and expectation management throughout project lifecycle",
+          "Documentation of stakeholder analysis and engagement strategies",
+          "Focus on managing stakeholder expectations and communications"
         ],
         differences: [
-          "PMBOK: Dedicated stakeholder management knowledge area with specific processes",
-          "PRINCE2: Business stakeholder focus with communication management strategy",
-          "ISO 21500: General guidance without specific stakeholder management processes",
-          "PMBOK uses power/interest grid for stakeholder classification",
-          "PRINCE2 emphasizes Senior User and Executive roles specifically"
+          "PMBOK: Dedicated stakeholder performance domain with specific engagement assessment matrix",
+          "PRINCE2: Business stakeholder focus with communication management strategy and project board representation",
+          "ISO 21500: General guidance on stakeholder concepts without specific processes",
+          "PMBOK uses power/interest grid and detailed stakeholder classification",
+          "PRINCE2 emphasizes specific roles (Executive, Senior User) for stakeholder representation"
         ],
         uniquePoints: [
-          "PMBOK ONLY: Stakeholder engagement assessment matrix (unaware, resistant, neutral, supportive, leading)",
-          "PRINCE2 ONLY: Specific communication management strategy document",
-          "ISO 21500 ONLY: International perspective on cultural stakeholder diversity",
-          "PMBOK ONLY: Formal stakeholder engagement control process",
-          "PRINCE2 ONLY: Project board representation of key stakeholder interests"
+          "PMBOK ONLY: Stakeholder engagement assessment matrix with five engagement levels",
+          "PRINCE2 ONLY: Specific communication management strategy document and project board structure",
+          "ISO 21500 ONLY: International perspective on cultural and diverse stakeholder environments",
+          "PMBOK ONLY: Formal stakeholder engagement control and monitoring processes",
+          "PRINCE2 ONLY: Daily Log for informal stakeholder communications and issues"
         ]
       },
       "Quality Management": {
         similarities: [
-          "Quality planning required before execution phase",
-          "Quality control through verification and validation activities",
-          "Continuous improvement principles embedded in all methodologies",
-          "Quality standards and acceptance criteria definition",
-          "Documentation of quality management approach"
+          "Quality planning required before project execution begins",
+          "Quality control through verification and validation activities mandatory",
+          "Continuous improvement principles embedded in quality approach",
+          "Quality standards and acceptance criteria must be defined",
+          "Documentation of quality management processes and results"
         ],
         differences: [
-          "PMBOK: Quality separated into planning, assurance, and control processes",
-          "PRINCE2: Quality integrated as a theme with product descriptions",
-          "ISO 21500: Quality aligned with ISO 9001 quality management systems",
-          "PMBOK uses cost of quality (prevention, appraisal, failure costs)",
-          "PRINCE2 focuses on product quality through quality register"
+          "PMBOK: Quality management separated into planning, assurance, and control processes",
+          "PRINCE2: Quality integrated as a theme with product descriptions and quality register",
+          "ISO 21500: Quality aligned with ISO 9001 quality management systems approach",
+          "PMBOK emphasizes cost of quality and statistical tools for quality control",
+          "PRINCE2 focuses on product quality through quality criteria in product descriptions"
         ],
         uniquePoints: [
-          "PMBOK ONLY: Seven basic quality tools (cause-effect, flowcharts, Pareto, etc.)",
-          "PRINCE2 ONLY: Product-based planning with quality criteria in product descriptions",
+          "PMBOK ONLY: Seven basic quality tools and design of experiments techniques",
+          "PRINCE2 ONLY: Product-based planning with explicit quality criteria in product descriptions",
           "ISO 21500 ONLY: Direct alignment with ISO 9001 quality management principles",
-          "PMBOK ONLY: Design of experiments and statistical sampling techniques",
-          "PRINCE2 ONLY: Quality review technique for formal product assessment"
+          "PMBOK ONLY: Quality metrics and detailed control charts for process control",
+          "PRINCE2 ONLY: Quality review technique and project assurance responsibilities"
+        ]
+      },
+      "Project Planning": {
+        similarities: [
+          "Comprehensive planning before project execution is essential",
+          "Planning should be iterative and adaptable to changes",
+          "Multiple planning levels (high-level to detailed) recommended",
+          "Stakeholder involvement in planning process emphasized",
+          "Documentation of planning assumptions and constraints required"
+        ],
+        differences: [
+          "PMBOK: Planning as a performance domain with emphasis on iterative planning approaches",
+          "PRINCE2: Product-based planning with stage plans and exception planning",
+          "ISO 21500: General guidance on planning concepts and principles",
+          "PMBOK focuses on adaptive planning and tailoring based on project context",
+          "PRINCE2 uses product breakdown structures and detailed product descriptions"
+        ],
+        uniquePoints: [
+          "PMBOK ONLY: Rolling wave planning and detailed planning performance domain guidance",
+          "PRINCE2 ONLY: Product-based planning technique and stage boundary management",
+          "ISO 21500 ONLY: International standardization of planning concepts and terminology",
+          "PMBOK ONLY: Planning tailored to project complexity and development approach",
+          "PRINCE2 ONLY: Exception plans for managing deviations from agreed tolerances"
         ]
       }
     };
 
     return topicInsights[topic] || {
       similarities: [
-        "Common project management principles and best practices",
-        "Systematic approach to project delivery",
-        "Emphasis on planning and control mechanisms"
+        "Common project management principles and systematic approaches",
+        "Emphasis on structured processes and controlled execution",
+        "Focus on delivering project objectives and business benefits",
+        "Importance of documentation and communication management",
+        "Adaptive approaches based on project context and complexity"
       ],
       differences: [
-        "Different terminology and process structures",
-        "Varying levels of prescription and flexibility",
-        "Distinct organizational and governance approaches"
+        "Different terminology, process structures, and methodology frameworks",
+        "Varying levels of prescription, flexibility, and organizational focus",
+        "Distinct governance structures and decision-making approaches",
+        "Different emphasis on documentation, formalization, and control mechanisms",
+        "Varied approaches to tailoring and methodology adaptation"
       ],
       uniquePoints: [
-        "Each methodology offers specialized techniques and tools",
-        "Different cultural and organizational contexts addressed",
-        "Varied emphasis on documentation and formalization"
+        "Each methodology offers specialized techniques, tools, and focus areas",
+        "Different cultural, organizational, and industry contexts addressed",
+        "Varied emphasis on business justification, value delivery, and principles",
+        "Unique governance models and organizational structures supported",
+        "Specific certification paths and professional development frameworks"
       ]
     };
   };
@@ -332,32 +355,41 @@ const Comparisons = () => {
   const generateRecommendations = (topic) => {
     const recommendations = {
       "Risk Management": [
-        "Use PMBOK for complex projects requiring quantitative risk analysis",
-        "Apply PRINCE2 for organizations with strong stage-gate governance",
-        "Reference ISO 21500 for organizations new to formal risk management",
-        "Combine PMBOK techniques with PRINCE2 governance for comprehensive coverage",
-        "Use ISO 21500 as foundation and supplement with specific techniques as needed"
+        "Use PMBOK for complex projects requiring detailed quantitative risk analysis and specific risk categories",
+        "Apply PRINCE2 for organizations with strong governance requirements and explicit risk budgeting",
+        "Reference ISO 21500 for organizations new to formal risk management or needing high-level guidance",
+        "Combine PMBOK risk analysis techniques with PRINCE2 governance for comprehensive coverage",
+        "Use ISO 21500 as foundation and supplement with specific techniques based on project complexity"
       ],
       "Stakeholder Engagement": [
-        "PMBOK provides most comprehensive stakeholder analysis techniques",
-        "PRINCE2 offers clear business stakeholder accountability structures",
-        "ISO 21500 suitable for international projects with diverse stakeholders",
-        "Use PMBOK matrix for complex stakeholder environments",
-        "Apply PRINCE2 communication strategy for clear governance reporting"
+        "PMBOK provides most comprehensive stakeholder analysis and engagement assessment techniques",
+        "PRINCE2 offers clear business stakeholder accountability through project board structure",
+        "ISO 21500 suitable for international projects with diverse cultural stakeholder environments",
+        "Use PMBOK stakeholder matrix for complex stakeholder environments and engagement planning",
+        "Apply PRINCE2 communication strategy for organizations requiring formal governance reporting"
       ],
       "Quality Management": [
-        "PMBOK offers detailed quality tools and techniques",
-        "PRINCE2 provides excellent product-focused quality approach",
-        "ISO 21500 ideal for organizations using ISO 9001 quality systems",
-        "Combine PMBOK quality control with PRINCE2 product descriptions",
-        "Use ISO 21500 as quality management system foundation"
+        "PMBOK offers detailed quality tools, techniques, and statistical process control methods",
+        "PRINCE2 provides excellent product-focused quality approach with clear acceptance criteria",
+        "ISO 21500 ideal for organizations already using ISO 9001 quality management systems",
+        "Combine PMBOK quality control techniques with PRINCE2 product descriptions for comprehensive quality",
+        "Use ISO 21500 as quality management system foundation and add specific techniques as needed"
+      ],
+      "Project Planning": [
+        "PMBOK suitable for adaptive planning approaches and complex, changing environments",
+        "PRINCE2 excellent for organizations requiring strict stage controls and product-based planning",
+        "ISO 21500 provides solid foundation for organizations new to formal project planning",
+        "Use PMBOK for projects requiring high flexibility and iterative planning approaches",
+        "Apply PRINCE2 for projects with clear deliverables and strong governance requirements"
       ]
     };
 
     return recommendations[topic] || [
-      "Select methodology based on organizational maturity and project complexity",
-      "Consider combining elements from multiple methodologies for optimal coverage",
-      "Tailor the approach based on specific project requirements and constraints"
+      "Select methodology based on organizational maturity, project complexity, and industry context",
+      "Consider combining elements from multiple methodologies for optimal project coverage",
+      "Tailor the approach based on specific project requirements, constraints, and stakeholder needs",
+      "Evaluate organizational culture and existing processes when selecting methodology",
+      "Consider certification requirements and team expertise in methodology selection"
     ];
   };
 
@@ -380,6 +412,11 @@ const Comparisons = () => {
     setTopicSearchTerm("");
   };
 
+  // Navigate to standard section with highlighting
+  const navigateToSection = (standardSlug, sectionId) => {
+    navigate(`/standards?standard=${standardSlug}&section=${sectionId}&highlight=true`);
+  };
+
   // Render section with deep linking
   const renderSectionLink = (section, standardSlug) => (
     <div 
@@ -395,8 +432,8 @@ const Comparisons = () => {
         </span>
       )}
       <span className="link-icon">🔗</span>
-      <span className="relevance-badge" style={{ opacity: Math.min(section.relevanceScore / 10, 1) }}>
-        {Math.min(section.relevanceScore, 100)}%
+      <span className="relevance-badge">
+        {Math.min(section.relevanceScore || 80, 100)}% relevant
       </span>
     </div>
   );
@@ -577,17 +614,17 @@ const Comparisons = () => {
                 </div>
                 <div className="grid-cell">
                   <div className="approach-description">
-                    {selectedComparison.standards.pmbok?.approach || "Process-based framework with principles and performance domains"}
+                    {selectedComparison.standards.pmbok7.approach}
                   </div>
                 </div>
                 <div className="grid-cell">
                   <div className="approach-description">
-                    {selectedComparison.standards.prince2?.approach || "Principle-theme-process methodology with product-based planning"}
+                    {selectedComparison.standards.prince2.approach}
                   </div>
                 </div>
                 <div className="grid-cell">
                   <div className="approach-description">
-                    {selectedComparison.standards.iso21500?.approach || "Guidance standard focusing on project management concepts and processes"}
+                    {selectedComparison.standards.iso21500.approach}
                   </div>
                 </div>
 
@@ -598,9 +635,9 @@ const Comparisons = () => {
                 </div>
                 <div className="grid-cell">
                   <div className="sections-list">
-                    {selectedComparison.standards.pmbok?.sections?.length > 0 ? (
-                      selectedComparison.standards.pmbok.sections.map(section => 
-                        renderSectionLink(section, 'pmbok')
+                    {selectedComparison.standards.pmbok7.sections.length > 0 ? (
+                      selectedComparison.standards.pmbok7.sections.map(section => 
+                        renderSectionLink(section, 'pmbok7')
                       )
                     ) : (
                       <div className="no-sections">No relevant sections found</div>
@@ -609,7 +646,7 @@ const Comparisons = () => {
                 </div>
                 <div className="grid-cell">
                   <div className="sections-list">
-                    {selectedComparison.standards.prince2?.sections?.length > 0 ? (
+                    {selectedComparison.standards.prince2.sections.length > 0 ? (
                       selectedComparison.standards.prince2.sections.map(section => 
                         renderSectionLink(section, 'prince2')
                       )
@@ -620,7 +657,7 @@ const Comparisons = () => {
                 </div>
                 <div className="grid-cell">
                   <div className="sections-list">
-                    {selectedComparison.standards.iso21500?.sections?.length > 0 ? (
+                    {selectedComparison.standards.iso21500.sections.length > 0 ? (
                       selectedComparison.standards.iso21500.sections.map(section => 
                         renderSectionLink(section, 'iso21500')
                       )
@@ -636,17 +673,17 @@ const Comparisons = () => {
                 </div>
                 <div className="grid-cell">
                   <div className="focus-description">
-                    {selectedComparison.standards.pmbok?.focus || "Delivering value through tailored processes and principles"}
+                    {selectedComparison.standards.pmbok7.focus}
                   </div>
                 </div>
                 <div className="grid-cell">
                   <div className="focus-description">
-                    {selectedComparison.standards.prince2?.focus || "Business justification and controlled stage management"}
+                    {selectedComparison.standards.prince2.focus}
                   </div>
                 </div>
                 <div className="grid-cell">
                   <div className="focus-description">
-                    {selectedComparison.standards.iso21500?.focus || "Universal guidance applicable to all organization types"}
+                    {selectedComparison.standards.iso21500.focus}
                   </div>
                 </div>
               </div>
@@ -742,69 +779,6 @@ const Comparisons = () => {
             </div>
           </div>
         )}
-      </div>
-
-      {/* Existing Comparisons Archive */}
-      <div className="archive-section">
-        <div className="section-header">
-          <h2>Comparison Archive</h2>
-          <p>Previously generated and saved comparisons</p>
-        </div>
-
-        <div className="archive-controls">
-          <div className="search-box-container">
-            <input
-              type="text"
-              className="search-box"
-              placeholder="Search archived comparisons..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <span className="search-icon">🔍</span>
-          </div>
-
-          <select 
-            className="topic-filter"
-            value={filterTopic}
-            onChange={(e) => setFilterTopic(e.target.value)}
-          >
-            {topics.map(topic => (
-              <option key={topic} value={topic}>
-                {topic === "all" ? "All Topics" : topic}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="archive-grid">
-          {filteredComparisons.length > 0 ? (
-            filteredComparisons.map((comparison, index) => (
-              <div 
-                key={comparison._id || index} 
-                className="archive-card"
-                onClick={() => {
-                  setSelectedComparison(comparison);
-                  setComparisonMode("results");
-                }}
-              >
-                <h3>{comparison.title}</h3>
-                <span className="topic-badge">{comparison.topic}</span>
-                <div className="card-meta">
-                  <span className="date">
-                    {new Date(comparison.createdAt || Date.now()).toLocaleDateString()}
-                  </span>
-                  <span className="mapping-count">
-                    {comparison.mappings?.length || 0} mappings
-                  </span>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="no-archive">
-              <p>No archived comparisons found</p>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );
