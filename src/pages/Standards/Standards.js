@@ -14,21 +14,7 @@ const Standards = () => {
   // The real array is in data.data
   const standardsData = Array.isArray(data?.data) ? data.data : [];
 
-  // Download options for each standard
-  const downloadOptions = {
-    pmbok: {
-      epub: "/public/pmbok.epub"
-   
-    },
-    prince2: {
-      pdf: "/public/prince2-7.pdf",
-   
-    },
-    iso21500: {
-      pdf: "/downloads/iso215002.pdf",
-     
-    }
-  };
+ 
 
   // Search functionality - MOVED TO TOP
   const searchInSection = (section, standard, results, searchLower, path) => {
@@ -117,20 +103,37 @@ const Standards = () => {
     return bookmarks.includes(bookmarkId);
   };
 
-  // Download functionality
-  const handleDownload = (format, standardSlug = null) => {
-    const slug = standardSlug || selectedStandard?.slug;
-    const downloadUrl = downloadOptions[slug]?.[format];
-    
-    if (downloadUrl) {
-      window.open(downloadUrl, '_blank');
-    } else {
-      // Fallback: Show message for unavailable downloads
-      alert(`${format.toUpperCase()} format is not available for this standard yet.`);
+const handleDownload = (format, standardSlug = null) => {
+  const slug = standardSlug || selectedStandard?.slug;
+  
+  const officialLinks = {
+    pmbok: {
+      pdf: "https://www.pmi.org/pmbok-guide-standards/foundational/pmbok",
+      epub: "https://www.pmi.org/pmbok-guide-standards/foundational/pmbok",
+      html: "https://www.pmi.org/pmbok-guide-standards/foundational/pmbok"
+    },
+    prince2: {
+      pdf: "https://www.axelos.com/certifications/prince2",
+      epub: "https://www.axelos.com/certifications/prince2", 
+      html: "https://www.axelos.com/certifications/prince2"
+    },
+    iso21500: {
+      pdf: "https://www.iso.org/standard/74993.html",
+      epub: "https://www.iso.org/standard/74993.html",
+      html: "https://www.iso.org/standard/74993.html"
     }
-    setDownloadMenuOpen(false);
   };
 
+  const officialUrl = officialLinks[slug]?.[format] || officialLinks[slug]?.pdf;
+  
+  if (officialUrl) {
+    window.open(officialUrl, '_blank');
+  } else {
+    alert(`Please visit the official website to access ${selectedStandard?.title} in ${format.toUpperCase()} format.`);
+  }
+  
+  setDownloadMenuOpen(false);
+};
   // Navigation functions
   const handleStandardSelect = (standard) => {
     setSelectedStandard(standard);
