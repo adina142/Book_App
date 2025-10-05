@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import "./Comparisons.css";
 
 const Comparisons = () => {
-  const { data: comparisonsData, loading, error } = useFetch("/comparisons");
-  const { data: standardsData } = useFetch("/standards");
+  const { data: comparisonsData, loading: comparisonsLoading, error: comparisonsError } = useFetch("/comparisons");
+  const { data: standardsData, loading: standardsLoading, error: standardsError } = useFetch("/standards/all");
   const navigate = useNavigate();
   
   const [selectedComparison, setSelectedComparison] = useState(null);
@@ -42,27 +42,28 @@ const Comparisons = () => {
   let comparisons = [];
   let standards = [];
   
+  // Handle comparisons data
   if (comparisonsData) {
+    console.log("Comparisons Data:", comparisonsData);
     if (Array.isArray(comparisonsData.data)) {
       comparisons = comparisonsData.data;
     } else if (Array.isArray(comparisonsData)) {
       comparisons = comparisonsData;
-    } else {
-      Object.keys(comparisonsData).forEach(key => {
-        if (Array.isArray(comparisonsData[key])) {
-          comparisons = comparisonsData[key];
-        }
-      });
     }
   }
 
+  // Handle standards data
   if (standardsData) {
+    console.log("Standards Data:", standardsData);
     if (Array.isArray(standardsData.data)) {
       standards = standardsData.data;
     } else if (Array.isArray(standardsData)) {
       standards = standardsData;
     }
   }
+
+  console.log("Processed Standards:", standards);
+  console.log("Processed Comparisons:", comparisons);
 
   // Extract unique topics for filter
   const topics = ["all", ...new Set(comparisons.map(comp => comp.topic).filter(Boolean))];
@@ -125,11 +126,14 @@ const Comparisons = () => {
 
   // Generate comprehensive comparison for a topic
   const generateComparison = (topic) => {
+    console.log("Generating comparison for topic:", topic);
+    console.log("Available standards:", standards.map(s => s.slug));
+
     const comparison = {
       title: `${topic} Comparison`,
       topic: topic,
       standards: {
-        pmbok7: { sections: [], approach: "", focus: "" },
+        pmbok: { sections: [], approach: "", focus: "" },
         prince2: { sections: [], approach: "", focus: "" },
         iso21500: { sections: [], approach: "", focus: "" }
       },
@@ -143,23 +147,29 @@ const Comparisons = () => {
 
     // Generate data for each standard
     standards.forEach(standard => {
+      console.log(`Processing standard: ${standard.slug}`);
       const relevantSections = findRelevantSections(standard, topic);
       comparison.standards[standard.slug] = {
         sections: relevantSections,
         approach: getStandardApproach(standard.slug),
         focus: getStandardFocus(standard.slug)
       };
+      console.log(`Sections found for ${standard.slug}:`, relevantSections.length);
     });
 
     // Generate comprehensive insights
     comparison.insights = generateComprehensiveInsights(topic);
     comparison.recommendations = generateRecommendations(topic);
     
+    console.log("Generated comparison:", comparison);
     return comparison;
   };
 
   const findRelevantSections = (standard, topic) => {
-    if (!standard.sections) return [];
+    if (!standard.sections || !Array.isArray(standard.sections)) {
+      console.log(`No sections found for ${standard.slug}`);
+      return [];
+    }
     
     const relevant = [];
     const searchSections = (sections, depth = 0) => {
@@ -180,17 +190,21 @@ const Comparisons = () => {
     
     searchSections(standard.sections);
     // Sort by relevance and limit to top 5 sections
-    return relevant.sort((a, b) => b.relevanceScore - a.relevanceScore).slice(0, 5);
+    const sortedRelevant = relevant.sort((a, b) => b.relevanceScore - a.relevanceScore).slice(0, 5);
+    console.log(`Relevant sections for ${standard.slug}:`, sortedRelevant);
+    return sortedRelevant;
   };
 
   const calculateRelevance = (section, topic) => {
+    if (!section) return 0;
+    
     let score = 0;
     const topicWords = topic.toLowerCase().split(' ');
     
     topicWords.forEach(word => {
-      if (section.title.toLowerCase().includes(word)) score += 3;
+      if (section.title?.toLowerCase().includes(word)) score += 3;
       if (section.text?.toLowerCase().includes(word)) score += 2;
-      if (section.subsections?.some(sub => sub.title.toLowerCase().includes(word))) score += 1;
+      if (section.subsections?.some(sub => sub.title?.toLowerCase().includes(word))) score += 1;
     });
     
     return score;
@@ -198,20 +212,22 @@ const Comparisons = () => {
 
   const getStandardApproach = (slug) => {
     const approaches = {
+      pmbok: "Process-based framework with principles and performance domains",
       pmbok7: "Process-based framework with 12 principles and 8 performance domains",
       prince2: "Principle-theme-process methodology with product-based planning",
       iso21500: "Guidance standard focusing on project management concepts and processes"
     };
-    return approaches[slug] || "";
+    return approaches[slug] || "Standard project management approach";
   };
 
   const getStandardFocus = (slug) => {
     const focuses = {
+      pmbok: "Delivering value through tailored processes and principles",
       pmbok7: "Delivering value through tailored processes and principles",
       prince2: "Business justification and controlled stage management",
       iso21500: "Universal guidance applicable to all organization types"
     };
-    return focuses[slug] || "";
+    return focuses[slug] || "Project management best practices";
   };
 
   const generateComprehensiveInsights = (topic) => {
@@ -379,11 +395,14 @@ const Comparisons = () => {
         </span>
       )}
       <span className="link-icon">🔗</span>
-      <span className="relevance-badge" style={{ opacity: section.relevanceScore / 10 }}>
-        {section.relevanceScore}%
+      <span className="relevance-badge" style={{ opacity: Math.min(section.relevanceScore / 10, 1) }}>
+        {Math.min(section.relevanceScore, 100)}%
       </span>
     </div>
   );
+
+  const loading = comparisonsLoading || standardsLoading;
+  const error = comparisonsError || standardsError;
 
   if (loading) return (
     <div className="loading-container">
@@ -558,17 +577,17 @@ const Comparisons = () => {
                 </div>
                 <div className="grid-cell">
                   <div className="approach-description">
-                    {selectedComparison.standards.pmbok7.approach}
+                    {selectedComparison.standards.pmbok?.approach || "Process-based framework with principles and performance domains"}
                   </div>
                 </div>
                 <div className="grid-cell">
                   <div className="approach-description">
-                    {selectedComparison.standards.prince2.approach}
+                    {selectedComparison.standards.prince2?.approach || "Principle-theme-process methodology with product-based planning"}
                   </div>
                 </div>
                 <div className="grid-cell">
                   <div className="approach-description">
-                    {selectedComparison.standards.iso21500.approach}
+                    {selectedComparison.standards.iso21500?.approach || "Guidance standard focusing on project management concepts and processes"}
                   </div>
                 </div>
 
@@ -579,22 +598,34 @@ const Comparisons = () => {
                 </div>
                 <div className="grid-cell">
                   <div className="sections-list">
-                    {selectedComparison.standards.pmbok7.sections.map(section => 
-                      renderSectionLink(section, 'pmbok7')
+                    {selectedComparison.standards.pmbok?.sections?.length > 0 ? (
+                      selectedComparison.standards.pmbok.sections.map(section => 
+                        renderSectionLink(section, 'pmbok')
+                      )
+                    ) : (
+                      <div className="no-sections">No relevant sections found</div>
                     )}
                   </div>
                 </div>
                 <div className="grid-cell">
                   <div className="sections-list">
-                    {selectedComparison.standards.prince2.sections.map(section => 
-                      renderSectionLink(section, 'prince2')
+                    {selectedComparison.standards.prince2?.sections?.length > 0 ? (
+                      selectedComparison.standards.prince2.sections.map(section => 
+                        renderSectionLink(section, 'prince2')
+                      )
+                    ) : (
+                      <div className="no-sections">No relevant sections found</div>
                     )}
                   </div>
                 </div>
                 <div className="grid-cell">
                   <div className="sections-list">
-                    {selectedComparison.standards.iso21500.sections.map(section => 
-                      renderSectionLink(section, 'iso21500')
+                    {selectedComparison.standards.iso21500?.sections?.length > 0 ? (
+                      selectedComparison.standards.iso21500.sections.map(section => 
+                        renderSectionLink(section, 'iso21500')
+                      )
+                    ) : (
+                      <div className="no-sections">No relevant sections found</div>
                     )}
                   </div>
                 </div>
@@ -605,17 +636,17 @@ const Comparisons = () => {
                 </div>
                 <div className="grid-cell">
                   <div className="focus-description">
-                    {selectedComparison.standards.pmbok7.focus}
+                    {selectedComparison.standards.pmbok?.focus || "Delivering value through tailored processes and principles"}
                   </div>
                 </div>
                 <div className="grid-cell">
                   <div className="focus-description">
-                    {selectedComparison.standards.prince2.focus}
+                    {selectedComparison.standards.prince2?.focus || "Business justification and controlled stage management"}
                   </div>
                 </div>
                 <div className="grid-cell">
                   <div className="focus-description">
-                    {selectedComparison.standards.iso21500.focus}
+                    {selectedComparison.standards.iso21500?.focus || "Universal guidance applicable to all organization types"}
                   </div>
                 </div>
               </div>
@@ -760,7 +791,7 @@ const Comparisons = () => {
                 <span className="topic-badge">{comparison.topic}</span>
                 <div className="card-meta">
                   <span className="date">
-                    {new Date(comparison.createdAt).toLocaleDateString()}
+                    {new Date(comparison.createdAt || Date.now()).toLocaleDateString()}
                   </span>
                   <span className="mapping-count">
                     {comparison.mappings?.length || 0} mappings
