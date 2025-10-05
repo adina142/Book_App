@@ -206,39 +206,4 @@ Push to the branch (git push origin feature/amazing-feature)
 
 Open a Pull Request
 
-📝 License
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-🙏 Acknowledgments
-Project Management Institute (PMI) for PMBOK Guide content
-
-Axelos for PRINCE2 methodology
-
-International Organization for Standardization (ISO) for ISO 21500
-
-All contributors and testers
-
-📞 Support
-For support and questions:
-
-Create an Issue
-
-Email: your-email@example.com
-
-Documentation: Wiki
-
-🚧 Roadmap
-Add more project management standards (Agile, Scrum, etc.)
-
-User authentication and personalized bookmarks
-
-Export comparison reports to PDF
-
-Collaborative comparison features
-
-API for third-party integrations
-
-Mobile app version
-
-Built with ❤️ for the project management community
 
